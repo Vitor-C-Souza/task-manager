@@ -20,6 +20,7 @@ public class Tarefa extends BaseEntity {
     @Column(name = "titulo", nullable = false)
     private String titulo;
 
+    @Builder.Default
     @Column(name = "concluida", nullable = false)
     private Boolean concluida = false;
 
