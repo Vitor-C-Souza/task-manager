@@ -12,6 +12,6 @@ public interface TarefaService {
     TarefaDTOResponse update(TarefaDTORequest request, UUID id);
     void delete(UUID id);
     TarefaDTOResponse findById(UUID id);
-    Page<TarefaDTOResponse> getAll(Pageable pageable);
-    TarefaDTOResponse updateConcluiStatus(UUID id);
+    Page<TarefaDTOResponse> findAll(Pageable pageable);
+    TarefaDTOResponse updateConcluidaStatus(UUID id);
 }

@@ -70,14 +70,14 @@ public class TarefaServiceImpl implements TarefaService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<TarefaDTOResponse> getAll(Pageable pageable) {
+    public Page<TarefaDTOResponse> findAll(Pageable pageable) {
         Page<Tarefa> tarefas = tarefaRepository.findAll(pageable);
         return tarefas.map(TarefaDTOResponse::toDto);
     }
 
     @Override
     @Transactional
-    public TarefaDTOResponse updateConcluiStatus(UUID id) {
+    public TarefaDTOResponse updateConcluidaStatus(UUID id) {
         Tarefa tarefa = tarefaRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Tarefa não encontrada com este ID: " + id));
 
