@@ -31,7 +31,7 @@ public class TarefaServiceImpl implements TarefaService {
 
         Tarefa tarefa = request.toEntity(categoria);
 
-        tarefaRepository.save(tarefa);
+        tarefaRepository.saveAndFlush(tarefa);
 
         return TarefaDTOResponse.toDto(tarefa);
     }
