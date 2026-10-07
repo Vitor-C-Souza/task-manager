@@ -117,6 +117,16 @@
 				</configuration>
 			</plugin>
 
+			<!-- Plugin Surefire para execução dos testes unitários -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.2.5</version>
+				<configuration>
+					<argLine>@{argLine}</argLine>
+				</configuration>
+			</plugin>
+
 			<!-- Plugin do JaCoCo para cálculo de cobertura de testes -->
 			<plugin>
 				<groupId>org.jacoco</groupId>
@@ -130,18 +140,26 @@
 				</configuration>
 				<executions>
 					<execution>
+						<id>prepare-agent</id>
 						<goals>
 							<goal>prepare-agent</goal>
 						</goals>
 					</execution>
 					<execution>
 						<id>report</id>
-						<phase>verify</phase>
+						<phase>test</phase>
 						<goals>
 							<goal>report</goal>
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+
+			<!-- Plugin do Sonar / SonarCloud -->
+			<plugin>
+				<groupId>org.sonarsource.scanner.maven</groupId>
+				<artifactId>sonar-maven-plugin</artifactId>
+				<version>3.11.0.3922</version>
 			</plugin>
 		</plugins>
 	</build>
