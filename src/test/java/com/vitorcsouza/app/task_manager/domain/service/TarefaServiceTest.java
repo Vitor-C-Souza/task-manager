@@ -16,10 +16,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -147,21 +152,143 @@ class TarefaServiceTest {
         }
     }
 
+    @Nested
+    @DisplayName("Testes do método delete")
+    class DeleteTests {
 
+        @Test
+        @DisplayName("Deve remover a tarefa quando o ID existir.")
+        void deveRemoverARetornarDTOQuandoTarefaExistir() {
+            // Arrange
+            when(tarefaRepository.findById(id)).thenReturn(Optional.of(tarefa));
 
-    @Test
-    @DisplayName("Deve lançar EntityNotFoundException quando buscar tarefa por ID inexistente")
-    void deveLancarEntityNotFoundExceptionQuandoBuscarTarefaPorId() {
-        // Arrange
-        UUID id = UUID.randomUUID();
-        when(tarefaRepository.findById(id)).thenReturn(Optional.empty());
+            // Act
+            tarefaService.delete(id);
 
-        // Act + Assert
-        EntityNotFoundException exception = assertThrows(
-                EntityNotFoundException.class, () -> tarefaService.findById(id));
+            // Assert
+            verify(tarefaRepository, times(1)).findById(id);
+            verify(tarefaRepository, times(1)).delete(tarefa);
+        }
 
-        assertEquals("Tarefa não encontrada com este ID: " + id, exception.getMessage());
-        verify(tarefaRepository).findById(id);
+        @Test
+        @DisplayName("Deve lançar EntityNotFoundException quando o ID não for encontrado.")
+        void deveLancarExceptionQuandoATarefaNaoForEncontrada() {
+            // Arrange
+            when(tarefaRepository.findById(id)).thenReturn(Optional.empty());
+
+            // Act + Assert
+            EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> tarefaService.delete(id));
+            assertEquals("Tarefa não encontrada com este ID: " + id, exception.getMessage());
+
+            verify(tarefaRepository, times(1)).findById(id);
+            verify(tarefaRepository, never()).delete(tarefa);
+        }
     }
 
+    @Nested
+    @DisplayName("Testes do método findById")
+    class FindByIdTests {
+
+        @Test
+        @DisplayName("Deve retornar o DTO da tarefa quando o ID existir.")
+        void deveRetornarDTOQuandoTarefaExistir() {
+            // Arrange
+            when(tarefaRepository.findById(id)).thenReturn(Optional.of(tarefa));
+
+            // Act
+            TarefaDTOResponse response = tarefaService.findById(id);
+
+            // Assert
+
+            assertNotNull(response);
+            assertEquals("Estudar JUnit 5", response.titulo());
+
+
+            verify(tarefaRepository, times(1)).findById(id);
+        }
+
+
+        @Test
+        @DisplayName("Deve lançar EntityNotFoundException quando buscar tarefa por ID inexistente")
+        void deveLancarEntityNotFoundExceptionQuandoBuscarTarefaPorId() {
+            // Arrange
+            when(tarefaRepository.findById(id)).thenReturn(Optional.empty());
+
+            // Act + Assert
+            EntityNotFoundException exception = assertThrows(
+                    EntityNotFoundException.class, () -> tarefaService.findById(id));
+
+            assertEquals("Tarefa não encontrada com este ID: " + id, exception.getMessage());
+            verify(tarefaRepository).findById(id);
+        }
+    }
+
+    @Nested
+    @DisplayName("Testes do método findAll")
+    class FindAllTests {
+        @Test
+        @DisplayName("Deve retornar página de tarefas com sucesso")
+        void findAll_ShouldReturnPageOfTarefaDTOResponse() {
+            Pageable pageable = PageRequest.of(0, 10);
+            Page<Tarefa> tarefaPage = new PageImpl<>(List.of(tarefa), pageable, 1);
+
+            when(tarefaRepository.findAll(pageable)).thenReturn(tarefaPage);
+
+            Page<TarefaDTOResponse> response = tarefaService.findAll(pageable);
+
+            assertNotNull(response);
+            assertEquals(1, response.getTotalElements());
+            verify(tarefaRepository).findAll(pageable);
+        }
+    }
+
+    @Nested
+    @DisplayName("Testes do método updateConcluidaStatus")
+    class UpdateConcluidaStatusTests {
+        @Test
+        @DisplayName("Deve alterar o status para true quando a tarefa estiver pendente.")
+        void deveAlterarStatusParaTarefaEstiverPendente() {
+            // Arrange
+            when(tarefaRepository.findById(id)).thenReturn(Optional.of(tarefa));
+
+            // Act
+            TarefaDTOResponse response = tarefaService.updateConcluidaStatus(id);
+
+            // Assert
+            assertNotNull(response);
+            assertEquals(true, response.concluida());
+
+            verify(tarefaRepository, times(1)).findById(id);
+        }
+
+        @Test
+        @DisplayName("Deve alterar o status para false quando a tarefa estiver concluída.")
+        void deveAlterarStatusParaFalseQuandoAConcluida() {
+            // Arrange
+            tarefa.setConcluida(true);
+            when(tarefaRepository.findById(id)).thenReturn(Optional.of(tarefa));
+
+            // Act
+            TarefaDTOResponse response = tarefaService.updateConcluidaStatus(id);
+
+            // Assert
+            assertNotNull(response);
+            assertEquals(false, response.concluida());
+
+            verify(tarefaRepository, times(1)).findById(id);
+        }
+
+        @Test
+        @DisplayName("Deve lançar EntityNotFoundException quando a tarefa não for encontrada.")
+        void deveLancarExceptionQuandoATarefaNaoForEncontrada() {
+            // Arrange
+            when(tarefaRepository.findById(id)).thenReturn(Optional.empty());
+
+            // Act + Assert
+            EntityNotFoundException exception = assertThrows(EntityNotFoundException.class, () -> tarefaService.updateConcluidaStatus(id));
+
+            assertEquals("Tarefa não encontrada com este ID: " + id, exception.getMessage());
+            verify(tarefaRepository, times(1)).findById(id);
+        }
+    }
 }
