@@ -19,7 +19,7 @@ jobs:
       - name: Checkout do código
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Garante o histórico completo para análise do SonarCloud
+          fetch-depth: 0
 
       - name: Configurar JDK 21
         uses: actions/setup-java@v4
@@ -38,19 +38,23 @@ jobs:
       - name: Dar permissão de execução ao Wrapper do Maven
         run: chmod +x mvnw
 
-      - name: Compilar, Testar e Analisar no SonarCloud
+      - name: Compilar, testar, gerar cobertura e analisar no SonarCloud
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-            ./mvnw clean test jacoco:report org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-              -Dsonar.projectKey=Vitor-C-Souza_task-manager \
-              -Dsonar.organization=vitor-c-souza \
-              -Dsonar.host.url=https://sonarcloud.io
+          ./mvnw clean verify sonar:sonar \
+            -Dsonar.projectKey=Vitor-C-Souza_task-manager \
+            -Dsonar.organization=vitor-c-souza \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.token="$SONAR_TOKEN" \
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
 
       - name: Upload dos artefatos de teste (Opcional em caso de falha)
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: surefire-reports
-          path: target/surefire-reports/
+          path: |
+            target/surefire-reports/
+            target/site/jacoco/
