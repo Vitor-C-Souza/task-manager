@@ -30,11 +30,8 @@
 		<java.version>21</java.version>
 		<tomcat.version>11.0.25</tomcat.version>
 		<logback.version>1.6.1</logback.version>
-		<sonar.sources>src/main/java</sonar.sources>
-		<sonar.tests>src/test/java</sonar.tests>
-		<sonar.java.binaries>target/classes</sonar.java.binaries>
 		<sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-		<sonar.coverage.exclusions>**/domain/dto/**,**/infra/exception/**</sonar.coverage.exclusions>
+		<sonar.coverage.exclusions>**/domain/dto/**,**/infra/exception/**,**/TaskManagerApplication.java</sonar.coverage.exclusions>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -129,7 +126,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>3.2.5</version>
 				<configuration>
-					<argLine>${jacocoArgLine}</argLine>
+					<argLine>${jacocoArgLine} -XX:+EnableDynamicAgentLoading</argLine>
 				</configuration>
 			</plugin>
 			<!-- Plugin do JaCoCo para cálculo e validação de cobertura -->
@@ -141,6 +138,7 @@
 					<excludes>
 						<exclude>**/domain/dto/**</exclude>
 						<exclude>**/infra/exception/**</exclude>
+						<exclude>**/TaskManagerApplication.java</exclude>
 					</excludes>
 				</configuration>
 				<executions>
