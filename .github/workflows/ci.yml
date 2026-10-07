@@ -38,3 +38,13 @@ jobs:
         with:
           name: surefire-reports
           path: target/surefire-reports/
+
+      - name: Executar Testes e Análise do SonarCloud
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          ./mvnw clean verify sonar:sonar \
+            -Dsonar.projectKey=SEU_PROJECT_KEY \
+            -Dsonar.organization=SUA_ORGANIZATION_KEY \
+            -Dsonar.host.url=https://sonarcloud.io
