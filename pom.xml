@@ -6,7 +6,7 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>4.1.1</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath/>
 	</parent>
 	<groupId>com.vitorcsouza.app</groupId>
 	<artifactId>task-manager</artifactId>
@@ -57,7 +57,6 @@
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-mysql</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
@@ -110,7 +109,6 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
 	<build>
 		<plugins>
 			<plugin>
@@ -125,7 +123,6 @@
 					</excludes>
 				</configuration>
 			</plugin>
-
 			<!-- Plugin Surefire para execução dos testes -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -135,8 +132,7 @@
 					<argLine>${jacocoArgLine}</argLine>
 				</configuration>
 			</plugin>
-
-			<!-- Plugin do JaCoCo para cálculo de cobertura -->
+			<!-- Plugin do JaCoCo para cálculo e validação de cobertura -->
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
@@ -164,9 +160,29 @@
 							<goal>report</goal>
 						</goals>
 					</execution>
+					<execution>
+						<id>check-coverage</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<rule>
+									<element>BUNDLE</element>
+									<limits>
+										<limit>
+											<counter>LINE</counter>
+											<value>COVEREDRATIO</value>
+											<minimum>0.80</minimum>
+										</limit>
+									</limits>
+								</rule>
+							</rules>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
-
 			<!-- Plugin do Sonar / SonarCloud -->
 			<plugin>
 				<groupId>org.sonarsource.scanner.maven</groupId>
@@ -175,5 +191,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
 </project>
