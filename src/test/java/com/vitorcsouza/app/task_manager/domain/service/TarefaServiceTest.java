@@ -10,6 +10,7 @@ import com.vitorcsouza.app.task_manager.domain.service.impl.TarefaServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -60,41 +61,97 @@ class TarefaServiceTest {
         request = new TarefaDTORequest("Estudar JUnit 5", categoriaId);
     }
 
-    @Test
-    @DisplayName("Deve criar e retornar DTO quando a categoria existir")
-    void deveCriarERetornarDTOQuandoACategoriaExistir() {
-        // Arrange
-        when(categoriaRepository.findById(categoriaId)).thenReturn(Optional.of(categoria));
-        when(tarefaRepository.saveAndFlush(any(Tarefa.class))).thenReturn(tarefa);
+    @Nested
+    @DisplayName("Testes do método create")
+    class CreateTests {
 
-        // Act
-        TarefaDTOResponse response = tarefaService.create(request);
+        @Test
+        @DisplayName("Deve criar e retornar DTO quando a categoria existir")
+        void deveCriarERetornarDTOQuandoACategoriaExistir() {
+            // Arrange
+            when(categoriaRepository.findById(categoriaId)).thenReturn(Optional.of(categoria));
+            when(tarefaRepository.saveAndFlush(any(Tarefa.class))).thenReturn(tarefa);
 
-        // Assert
-        assertNotNull(response);
-        assertEquals("Estudar JUnit 5", response.titulo());
+            // Act
+            TarefaDTOResponse response = tarefaService.create(request);
 
-        verify(categoriaRepository).findById(categoriaId);
-        verify(tarefaRepository).saveAndFlush(any(Tarefa.class));
+            // Assert
+            assertNotNull(response);
+            assertEquals("Estudar JUnit 5", response.titulo());
+
+            verify(categoriaRepository).findById(categoriaId);
+            verify(tarefaRepository).saveAndFlush(any(Tarefa.class));
+        }
+
+        @Test
+        @DisplayName("Deve lançar EntityNotFoundException quando a categoria não for encontrada.")
+        void deveLancarExceptionQuandoACategoriaNaoForEncontrada() {
+            // Arrange
+            when(categoriaRepository.findById(categoriaId)).thenReturn(Optional.empty());
+
+            // Act + Assert
+            assertThrows(EntityNotFoundException.class, () -> tarefaService.create(request));
+
+            verify(categoriaRepository, times(1)).findById(categoriaId);
+            verify(tarefaRepository, never()).saveAndFlush(any(Tarefa.class));
+        }
     }
 
-    @Test
-    @DisplayName("Deve lançar EntityNotFoundException quando a categoria não for encontrada.")
-    void DeveLancarExceptionQuandoACategoriaNaoForEncontrada() {
-        // Arrange
-        when(categoriaRepository.findById(categoriaId)).thenReturn(Optional.empty());
+    @Nested
+    @DisplayName("Testes do método update")
+    class UpdateTests {
 
-        // Act + Assert
-        assertThrows(EntityNotFoundException.class, () -> tarefaService.create(request));
+        @Test
+        @DisplayName("Deve atualizar e retornar DTO quando tarefa e categoria existirem.")
+        void deveAtualizarERetornarDTOQuandoTarefaExistir() {
+            // Arrange
+            when(tarefaRepository.findById(id)).thenReturn(Optional.of(tarefa));
+            when(categoriaRepository.findById(categoriaId)).thenReturn(Optional.of(categoria));
 
-        verify(categoriaRepository, times(1)).findById(categoriaId);
-        verify(tarefaRepository, never()).saveAndFlush(any(Tarefa.class));
+            // Act
+            TarefaDTOResponse response = tarefaService.update(request, id);
+
+            // Assert
+            assertNotNull(response);
+            assertEquals("Estudar JUnit 5", response.titulo());
+
+            verify(categoriaRepository, times(1)).findById(categoriaId);
+            verify(tarefaRepository, times(1)).findById(id);
+        }
+
+        @Test
+        @DisplayName("Deve lançar EntityNotFoundException quando a tarefa não for encontrada.")
+        void deveLancarExceptionQuandoATarefaNaoForEncontrada() {
+            // Arrange
+            when(tarefaRepository.findById(id)).thenReturn(Optional.empty());
+
+            // Act + Assert
+            assertThrows(EntityNotFoundException.class, () -> tarefaService.update(request, id));
+
+            verify(categoriaRepository, never()).findById(categoriaId);
+            verify(tarefaRepository, times(1)).findById(id);
+        }
+
+        @Test
+        @DisplayName("Deve lançar EntityNotFoundException ao atualizar quando categoria não existir.")
+        void deveLancarExceptionAtualizarCategoriaNaoExistir() {
+            // Arrange
+            when(tarefaRepository.findById(id)).thenReturn(Optional.of(tarefa));
+            when(categoriaRepository.findById(categoriaId)).thenReturn(Optional.empty());
+
+            // Act + Assert
+            assertThrows(EntityNotFoundException.class, () -> tarefaService.update(request, id));
+
+            verify(tarefaRepository, times(1)).findById(id);
+            verify(categoriaRepository, times(1)).findById(categoriaId);
+        }
     }
+
+
 
     @Test
     @DisplayName("Deve lançar EntityNotFoundException quando buscar tarefa por ID inexistente")
-    void deveLancarEntityNotFoundExceptionQuandoBuscarTarefaPorId()
-    {
+    void deveLancarEntityNotFoundExceptionQuandoBuscarTarefaPorId() {
         // Arrange
         UUID id = UUID.randomUUID();
         when(tarefaRepository.findById(id)).thenReturn(Optional.empty());
