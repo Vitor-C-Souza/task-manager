@@ -44,7 +44,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          ./mvnw clean verify sonar:sonar \
+          ./mvnw clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
             -Dsonar.projectKey=SEU_PROJECT_KEY \
             -Dsonar.organization=SUA_ORGANIZATION_KEY \
             -Dsonar.host.url=https://sonarcloud.io
