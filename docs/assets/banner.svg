@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1584" height="396" viewBox="0 0 1584 396" role="img" aria-labelledby="title desc">
+<title id="title">Task Manager API</title><desc id="desc">API de tarefas e categorias. Java 21, Spring Boot e MySQL. Cartões ilustrativos com marcações de conclusão.</desc>
+<defs><linearGradient id="bg"><stop stop-color="#101715"/><stop offset="1" stop-color="#15372e"/></linearGradient></defs>
+<rect width="1584" height="396" fill="url(#bg)"/>
+<g fill="none" stroke="#38d9a9" opacity=".12"><path d="M0 331H170L216 285H870M1584 67H1450L1403 114H960M1584 336H1495L1460 300H1075"/><circle cx="870" cy="285" r="4"/></g>
+<rect x="77" y="70" width="46" height="4" rx="2" fill="#38d9a9"/>
+<text x="75" y="153" fill="#f4f8f6" font-family="Segoe UI,Arial,sans-serif" font-size="72" font-weight="700" letter-spacing="-2">Task Manager API</text>
+<text x="79" y="210" fill="#b4d0c4" font-family="Segoe UI,Arial,sans-serif" font-size="29">Tarefas organizadas. Backend bem estruturado.</text>
+<text x="79" y="272" fill="#55e1b5" font-family="Segoe UI,Arial,sans-serif" font-size="20" letter-spacing="2">JAVA 21 · SPRING BOOT · MYSQL</text>
+<g stroke="#38d9a9" fill="#172d25" stroke-width="1.5">
+<rect x="1110" y="65" width="337" height="76" rx="14"/>
+<rect x="1084" y="159" width="337" height="76" rx="14"/>
+<rect x="1110" y="253" width="337" height="76" rx="14"/>
+</g>
+<g fill="none" stroke="#55e1b5" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1133 100l9 9 18-20M1107 194l9 9 18-20"/><rect x="1133" y="279" width="23" height="23" rx="6" stroke-opacity=".5"/></g>
+<g stroke="#b4d0c4" stroke-width="5" stroke-linecap="round" opacity=".55"><path d="M1181 97h183M1181 113h121M1155 191h183M1155 207h135M1181 285h183M1181 301h100"/></g>
+<path d="M77 352H1507" stroke="#38d9a9" stroke-opacity=".2"/></svg>
