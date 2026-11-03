@@ -1,6 +1,14 @@
+![Task Manager API — Java 21, Spring Boot e MySQL](docs/assets/banner.svg)
+
 # Task Manager API
 
 API REST para gerenciamento de categorias e tarefas, desenvolvida com Java, Spring Boot e Spring Data JPA. Inclui validação de entrada, paginação, migrações Flyway, documentação interativa OpenAPI/Swagger UI e pipeline de CI com testes, JaCoCo e SonarCloud.
+
+[![CI](https://github.com/Vitor-C-Souza/task-manager/actions/workflows/ci.yml/badge.svg?branch=development)](https://github.com/Vitor-C-Souza/task-manager/actions/workflows/ci.yml)
+![Java 21](https://img.shields.io/badge/Java-21-orange)
+![Spring Boot 4.1.1](https://img.shields.io/badge/Spring_Boot-4.1.1-6DB33F)
+
+> Documentação da branch `development`. API backend sem interface gráfica ou autenticação implementadas nesta base; os cartões do banner são uma ilustração.
 
 ## Sumário
 - [Funcionalidades](#funcionalidades)
@@ -68,6 +76,31 @@ src/main/resources/
 
 Fluxo simplificado: controller recebe e valida a requisição; serviço aplica regras de negócio; repositórios acessam o banco; DTOs definem os dados expostos pela API; o tratamento global converte exceções em respostas HTTP.
 
+### Relação entre categorias e tarefas
+
+```mermaid
+erDiagram
+    CATEGORIA ||--o{ TAREFA : organiza
+    CATEGORIA {
+        UUID id
+        string nome
+    }
+    TAREFA {
+        UUID id
+        string titulo
+        boolean concluida
+        UUID categoria_id
+    }
+```
+
+### Regras de negócio
+
+- Uma tarefa exige uma categoria existente e começa com `concluida=false`.
+- O `PUT` de tarefa atualiza título e categoria; a conclusão é alterada pelo `PATCH`.
+- O `PATCH` inverte o status a cada chamada; repeti-lo pode desfazer a alteração anterior.
+- Excluir uma categoria com tarefas vinculadas retorna conflito de integridade (`409`).
+- As operações de escrita usam transações; as consultas são marcadas como somente leitura.
+
 ## Pré-requisitos
 - JDK 21.
 - Git.
@@ -91,6 +124,8 @@ docker compose ps
 docker compose logs -f mysql
 ```
 O Compose usa `root` como usuário e senha para facilitar o ambiente local. Essas credenciais são apenas para desenvolvimento; não as reutilize em produção ou ambientes compartilhados.
+
+Aguarde o MySQL aceitar conexões antes de iniciar a aplicação: o Compose atual não define health check nem inicia a API. A imagem está configurada como `mysql:latest`, sem versão fixa.
 
 ### 3. Conferir a configuração
 O perfil de desenvolvimento está em `src/main/resources/application-dev.properties`. Por padrão, espera MySQL em `localhost:3306`, banco `db_task_manager`, usuário `root` e senha `root`. Ajuste `spring.datasource.*` se sua configuração local for diferente. Não versione senhas reais.
@@ -173,6 +208,33 @@ O endpoint `PATCH /api/v1/tarefa/{id}` não recebe corpo; ele inverte `concluida
 - Tarefa: `titulo` é obrigatório e não pode estar em branco; `categoriaId` é obrigatório e deve corresponder a uma categoria existente.
 - Respostas incluem ID e timestamps `createdAt` e `updatedAt`; respostas de tarefa incluem um resumo da categoria.
 
+### Fluxo rápido com cURL
+
+Com a API em execução, crie uma categoria:
+
+```bash
+curl -i -X POST http://localhost:8080/api/v1/categoria \
+  -H "Content-Type: application/json" \
+  -d '{"nome":"Estudos"}'
+```
+
+Copie o `id` retornado e substitua `UUID_DA_CATEGORIA`:
+
+```bash
+curl -i -X POST http://localhost:8080/api/v1/tarefa \
+  -H "Content-Type: application/json" \
+  -d '{"titulo":"Estudar testes de API","categoriaId":"UUID_DA_CATEGORIA"}'
+```
+
+Use o `id` da tarefa criada para alternar a conclusão:
+
+```bash
+curl -i -X PATCH http://localhost:8080/api/v1/tarefa/UUID_DA_TAREFA
+curl -i "http://localhost:8080/api/v1/tarefa?page=0&size=5&sort=titulo,asc"
+```
+
+Os exemplos usam sintaxe Bash. No PowerShell, utilize o Swagger UI ou adapte as aspas e use `curl.exe`.
+
 ## Paginação
 Os endpoints de listagem aceitam parâmetros do Spring Data:
 | Parâmetro | Padrão | Descrição |
@@ -207,7 +269,9 @@ Execute testes e validação de cobertura:
 ```
 No Windows, use `./mvnw.cmd clean verify`.
 
-O JaCoCo gera o relatório HTML em `target/site/jacoco/index.html` e o XML em `target/site/jacoco/jacoco.xml`, utilizado pelo SonarCloud. O build exige cobertura mínima de **80% das linhas**. A cobertura exibida pelo SonarCloud pode ter exclusões específicas; consulte o `pom.xml` ao comparar percentuais.
+A suíte inclui testes de serviços com mocks, testes MVC de controllers com MockMvc e teste de contexto. O perfil `test` usa H2 em modo MySQL com Flyway ativo; ele dispensa MySQL externo, mas não substitui testes contra o banco real. Se você ativou `dev` na sessão do terminal, desative-o antes de executar a suíte, para manter o ambiente de testes isolado.
+
+O JaCoCo gera o relatório HTML em `target/site/jacoco/index.html` e o XML em `target/site/jacoco/jacoco.xml`, utilizado pelo SonarCloud. O build exige cobertura mínima de **80% das linhas**. DTOs e classes de `infra/exception` estão excluídos da cobertura no JaCoCo e no Sonar. A meta configurada não representa o percentual atualmente alcançado; consulte o relatório do build ou o [painel SonarCloud](https://sonarcloud.io/dashboard?id=Vitor-C-Souza_task-manager&branch=development).
 
 ## Integração contínua
 O workflow `.github/workflows/ci.yml` roda em pushes e pull requests para `main` e `development`. Ele configura JDK 21, executa `./mvnw clean verify sonar:sonar`, gera e valida a cobertura e envia a análise ao SonarCloud. Em caso de falha, publica relatórios de teste e cobertura como artefatos.
@@ -222,6 +286,10 @@ Configure o segredo `SONAR_TOKEN` nas configurações do repositório GitHub. Nu
 - Execute `./mvnw clean verify` antes de abrir pull requests.
 - Atualize esta documentação quando rotas, contratos ou configuração mudarem.
 - Revise dependências e alertas do SonarCloud periodicamente.
+
+## Autor
+
+**Vítor Cavalcante Souza** · [GitHub](https://github.com/Vitor-C-Souza) · [LinkedIn](https://www.linkedin.com/in/vitorcavalcantesouza/)
 
 ## Licença
 Nenhum arquivo de licença foi identificado no repositório no momento desta documentação. Até que uma licença seja adicionada, não presuma que o código esteja liberado para reutilização, distribuição ou modificação.
